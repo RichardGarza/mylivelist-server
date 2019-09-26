@@ -1,6 +1,7 @@
 const request = require("request");
 const base = "http://localhost:3000/users/";
 const sequelize = require("../../models/index").sequelize;
+const server = require("../../bin/www");
 const User = require("../../models").User;
 const Store = require("../../models").Store;
 
@@ -8,78 +9,25 @@ describe("routes : users", () => {
   beforeEach(done => {
     sequelize
       .sync({ force: true })
-      .then(() => {
+      .then(() => {})
+      .catch(err => {
+        console.log("ERR1");
         done();
+      });
+
+    this.user;
+    this.store;
+    User.create({
+      email: "whatever@totally.com",
+      password: "123456789"
+    })
+      .then(user => {
+        this.user = user;
       })
       .catch(err => {
-        console.log(err);
+        console.log("ERR3");
         done();
       });
-  });
-
-  describe("GET /users/:id", () => {
-    beforeEach(done => {
-      this.user;
-
-      User.create({
-        email: "starman@tesla.com",
-        password: "Trekkie4lyfe"
-      }).then(user => {
-        this.user = user;
-
-        Store.create({});
-      });
-    });
-
-    it("should present user's posts && user's comment && user's favorite posts", done => {
-      User.create({
-        email: "shaqalack@tallMen.com",
-        password: "hanesTagless71"
-      })
-        .then(user => {
-          Post.create({
-            title: "Fireball Fighting",
-            body: "So much Pain!",
-            userId: user.id,
-            topicId: this.post.topicId
-          }).then(post => {
-            Favorite.create({
-              userId: this.user.id,
-              postId: post.id
-            }).then(
-              setTimeout(() => {
-                // Give database 2 seconds to catch up before sending request.
-                request.get(`${base}${this.user.id}`, (err, res, body) => {
-                  // Verify body contains user's post
-                  expect(body).toContain("Snowball Fighting");
-
-                  // Verify body contains user's comment
-                  expect(body).toContain("This comment is alright.");
-
-                  // Verify body contains favorited post created by other user
-                  expect(body).toContain("Fireball Fighting");
-
-                  done();
-                });
-              }, 2000)
-            );
-          });
-        })
-        .catch(err => {
-          console.log(err);
-          done();
-        });
-    });
-  });
-
-  describe("GET /users/sign_up", () => {
-    it("should render a view with a sign up form", done => {
-      request.get(`${base}sign_up`, (err, res, body) => {
-        expect(err).toBeNull();
-        expect(body).toContain("Sign up");
-        done();
-      });
-    });
   });
 
   describe("POST /users", () => {
@@ -93,6 +41,7 @@ describe("routes : users", () => {
       };
       // Send Post Request
       request.post(options, (err, res, body) => {
+        console.log("ERRRORRRRR", err);
         // Check Database for new User
         User.findOne({ where: { email: "user@example.com" } })
           .then(user => {
@@ -102,39 +51,13 @@ describe("routes : users", () => {
             done();
           })
           .catch(err => {
-            console.log(err);
+            console.log("ERR4", err);
             done();
           });
       });
     });
 
-    it("should create a new admin with secret values and redirect", done => {
-      const options = {
-        url: base,
-        form: {
-          email: "admin@secretsaucyness.com",
-          password: "123456789"
-        }
-      };
-      // Send Post Request
-      request.post(options, (err, res, body) => {
-        // Check Database for new Admin User
-        User.findOne({ where: { email: "admin@secretsaucyness.com" } })
-          .then(user => {
-            expect(user).not.toBeNull();
-            expect(user.email).toBe("admin@secretsaucyness.com");
-            expect(user.role).toBe("admin");
-            expect(user.id).toBe(1);
-            done();
-          })
-          .catch(err => {
-            console.log(err);
-            done();
-          });
-      });
-    });
-
-    it("should not create a new user with invalid attributes and redirect", done => {
+    it("should not create a new user with invalid email and redirect", done => {
       request.post(
         {
           url: base,
@@ -150,21 +73,34 @@ describe("routes : users", () => {
               done();
             })
             .catch(err => {
-              console.log(err);
+              console.log("ERR5");
               done();
             });
         }
       );
     });
-  });
 
-  describe("GET /users/sign_in", () => {
-    it("should render a view with a sign in form", done => {
-      request.get(`${base}sign_in`, (err, res, body) => {
-        expect(err).toBeNull();
-        expect(body).toContain("Sign in");
-        done();
-      });
+    it("should not create a new user with invalid password and redirect", done => {
+      request.post(
+        {
+          url: base,
+          form: {
+            email: "norman@bates.motel",
+            password: "123"
+          }
+        },
+        (err, res, body) => {
+          User.findOne({ where: { email: "norman@bates.motel" } })
+            .then(user => {
+              expect(user).toBeNull();
+              done();
+            })
+            .catch(err => {
+              console.log("ERR6");
+              done();
+            });
+        }
+      );
     });
   });
 });

@@ -14,30 +14,16 @@ module.exports = {
       const salt = bcrypt.genSaltSync();
       const hashedPassword = bcrypt.hashSync(newUser.password, salt);
 
-      if (newUser.email === "admin@secretsaucyness.com") {
-        return User.create({
-          email: newUser.email,
-          password: hashedPassword,
-          role: "admin"
+      return User.create({
+        email: newUser.email,
+        password: hashedPassword
+      })
+        .then(user => {
+          callback(null, user);
         })
-          .then(user => {
-            callback(null, user);
-          })
-          .catch(err => {
-            callback(err);
-          });
-      } else {
-        return User.create({
-          email: newUser.email,
-          password: hashedPassword
-        })
-          .then(user => {
-            callback(null, user);
-          })
-          .catch(err => {
-            callback(err);
-          });
-      }
+        .catch(err => {
+          callback(err);
+        });
     }
   },
 
