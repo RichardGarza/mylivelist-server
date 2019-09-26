@@ -1,35 +1,43 @@
-const User = require("./models").User;
-const Store = require("./models").Store;
+const User = require("../models").User;
+const Store = require("../models").Store;
 const bcrypt = require("bcryptjs");
 
 module.exports = {
   createUser(newUser, callback) {
-    const salt = bcrypt.genSaltSync();
-    const hashedPassword = bcrypt.hashSync(newUser.password, salt);
-
-    if (newUser.email === "admin@secretsaucyness.com") {
-      return User.create({
-        email: newUser.email,
-        password: hashedPassword,
-        role: "admin"
-      })
-        .then(user => {
-          callback(null, user);
-        })
-        .catch(err => {
-          callback(err);
-        });
+    if (newUser.password.length < 5 || newUser.password.length > 12) {
+      let err = {
+        message:
+          "Validation error: Password must be between 5 and 12 characters."
+      };
+      return callback(err);
     } else {
-      return User.create({
-        email: newUser.email,
-        password: hashedPassword
-      })
-        .then(user => {
-          callback(null, user);
+      const salt = bcrypt.genSaltSync();
+      const hashedPassword = bcrypt.hashSync(newUser.password, salt);
+
+      if (newUser.email === "admin@secretsaucyness.com") {
+        return User.create({
+          email: newUser.email,
+          password: hashedPassword,
+          role: "admin"
         })
-        .catch(err => {
-          callback(err);
-        });
+          .then(user => {
+            callback(null, user);
+          })
+          .catch(err => {
+            callback(err);
+          });
+      } else {
+        return User.create({
+          email: newUser.email,
+          password: hashedPassword
+        })
+          .then(user => {
+            callback(null, user);
+          })
+          .catch(err => {
+            callback(err);
+          });
+      }
     }
   },
 
