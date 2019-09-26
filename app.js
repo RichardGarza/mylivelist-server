@@ -7,14 +7,17 @@ const cors = require("cors");
 
 var indexRouter = require("./routes/index");
 var usersRouter = require("./routes/users");
+var storesRouter = require("./routes/stores");
 
 var app = express();
 
 app.use(cors());
 
-// view engine setup
-app.set("views", path.join(__dirname, "views"));
-app.set("view engine", "jade");
+// Testing fake login
+if (process.env.NODE_ENV === "test") {
+  const mockAuth = require("../../spec/support/mock-auth.js");
+  mockAuth.fakeIt(app);
+}
 
 app.use(logger("dev"));
 app.use(express.json());
@@ -22,8 +25,10 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, "public")));
 
+// Routes
 app.use("/", indexRouter);
 app.use("/users", usersRouter);
+app.use("/stores", storesRouter);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
