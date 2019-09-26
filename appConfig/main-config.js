@@ -10,6 +10,7 @@ module.exports = {
   init(app, express) {
     // Cross Origin Resourse Sharing (Required to share resources as API)
     app.use(cors());
+    passportConfig.init(app);
 
     // Logger
     app.use(logger("dev"));
@@ -19,7 +20,7 @@ module.exports = {
     app.use(express.urlencoded({ extended: false }));
     app.use(cookieParser());
     app.use(express.static(path.join(__dirname, "public")));
-
+    routeConfig.init(app);
     // catch 404 and forward to error handler
     app.use(function(req, res, next) {
       next(createError(404));
@@ -33,7 +34,6 @@ module.exports = {
 
       // render the error page
       res.status(err.status || 500);
-      res.render("error");
     });
 
     // Additional Config

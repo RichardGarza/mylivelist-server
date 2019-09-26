@@ -1,5 +1,5 @@
 const request = require("request");
-const base = "http://localhost:3000/users/";
+const base = "http://localhost:4000/users";
 const sequelize = require("../../models/index").sequelize;
 const server = require("../../bin/www");
 const User = require("../../models").User;
@@ -41,19 +41,11 @@ describe("routes : users", () => {
       };
       // Send Post Request
       request.post(options, (err, res, body) => {
-        console.log("ERRRORRRRR", err);
-        // Check Database for new User
-        User.findOne({ where: { email: "user@example.com" } })
-          .then(user => {
-            expect(user).not.toBeNull();
-            expect(user.email).toBe("user@example.com");
-            expect(user.id).toBe(1);
-            done();
-          })
-          .catch(err => {
-            console.log("ERR4", err);
-            done();
-          });
+        const response = JSON.parse(res.body);
+        expect(response.authenticated).toBe(true);
+        expect(response.err).toBeNull();
+        expect(response.userId).not.toBeNull();
+        done();
       });
     });
 
@@ -67,17 +59,13 @@ describe("routes : users", () => {
           }
         },
         (err, res, body) => {
-          User.findOne({ where: { email: "no" } })
-            .then(user => {
-              expect(user).toBeNull();
-              done();
-            })
-            .catch(err => {
-              console.log("ERR5");
-              done();
-            });
+          const response = JSON.parse(res.body);
+          expect(response.authenticated).toBe(false);
+          expect(response.err).toContain("Validation error");
+          expect(response.userId).toBe(undefined);
         }
       );
+      done();
     });
 
     it("should not create a new user with invalid password and redirect", done => {

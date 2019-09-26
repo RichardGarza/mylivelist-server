@@ -15,8 +15,8 @@ module.exports = {
       if (err) {
         res.json({
           authenticated: false,
-          err: `${err.message}`,
-          userId: user.id
+          err: `${err}`,
+          userId: undefined
         });
       } else {
         passport.authenticate("local")(req, res, () => {
