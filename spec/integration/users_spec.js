@@ -7,6 +7,9 @@ const Store = require("../../models").Store;
 
 describe("routes : users", () => {
   beforeEach(done => {
+    originalTimeout = jasmine.DEFAULT_TIMEOUT_INTERVAL;
+    jasmine.DEFAULT_TIMEOUT_INTERVAL = 100000;
+
     sequelize
       .sync({ force: true })
       .then(() => {})
@@ -39,8 +42,10 @@ describe("routes : users", () => {
           password: "123456789"
         }
       };
+      console.log("Before");
       // Send Post Request
       request.post(options, (err, res, body) => {
+        console.log("After");
         const response = JSON.parse(res.body);
         expect(response.authenticated).toBe(true);
         expect(response.err).toBeNull();
@@ -63,9 +68,9 @@ describe("routes : users", () => {
           expect(response.authenticated).toBe(false);
           expect(response.err).toContain("Validation error");
           expect(response.userId).toBe(undefined);
+          done();
         }
       );
-      done();
     });
 
     it("should not create a new user with invalid password and redirect", done => {
