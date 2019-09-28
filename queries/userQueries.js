@@ -4,7 +4,7 @@ const bcrypt = require("bcryptjs");
 
 module.exports = {
   createUser(newUser, callback) {
-    console.log("UserQueries Start", newUser);
+    console.log("2", newUser);
     if (newUser.password.length < 5 || newUser.password.length > 12) {
       let err = {
         message:

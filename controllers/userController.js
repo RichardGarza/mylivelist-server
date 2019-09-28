@@ -3,7 +3,7 @@ const passport = require("passport");
 
 module.exports = {
   create(req, res, next) {
-    console.log("UserController Start");
+    console.log("1", req.body);
     // Make newUser object from request body.
     newUser = {
       email: req.body.email,
@@ -12,10 +12,10 @@ module.exports = {
 
     // Call createuser with newUser object.
     userQueries.createUser(newUser, (err, user) => {
-      console.log("UserQueries Callback Start", err, user, newUser);
+      console.log("3");
       // If there's an error, respond accordingly.
       if (err) {
-        console.log("TESTING TESTING ", err);
+        console.log("4 ERR? ");
         if (err.message) {
           res.json({
             authenticated: false,
