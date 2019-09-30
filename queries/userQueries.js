@@ -28,16 +28,17 @@ module.exports = {
     }
   },
 
-  getUser(id, callback) {
+  getUser(newUser, callback) {
     let result = {};
+    let { email } = newUser;
 
-    User.findByPk(id).then(user => {
+    User.findOne({ where: { email } }).then(user => {
       if (!user) {
         callback(404);
       } else {
         result["user"] = user;
 
-        Store.scope({ method: ["allStoresFor", id] })
+        Store.scope({ method: ["allStoresFor", user.id] })
           .findAll()
           .then(stores => {
             result["stores"] = stores;
@@ -46,6 +47,7 @@ module.exports = {
             console.log(err);
           });
       }
+      callback(null, result);
     });
   }
 };

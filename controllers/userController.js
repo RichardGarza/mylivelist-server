@@ -11,6 +11,7 @@ module.exports = {
 
     // Call createuser with newUser object.
     userQueries.createUser(newUser, (err, user) => {
+      console.log("newUser");
       // If there's an error, respond accordingly.
       if (err) {
         if (err.message) {
@@ -18,6 +19,7 @@ module.exports = {
         } else {
           error = err;
         }
+        console.log("err", err);
         res.json({
           authenticated: false,
           err: `${error}`,
@@ -26,12 +28,14 @@ module.exports = {
       } else {
         passport.authenticate("local")(req, res, () => {
           if (!req.user) {
+            console.log("123");
             res.json({
               authenticated: false,
               err: `User Created, Login Failed.`,
               userId: user.id
             });
           } else {
+            console.log("918237", req.user);
             res.json({
               authenticated: true,
               err: null,
@@ -43,18 +47,47 @@ module.exports = {
     });
   },
   login(req, res, next) {
-    passport.authenticate("local")(req, res, () => {
-      if (!req.user) {
+    console.log("STARTED");
+    // Make newUser object from request body.
+    newUser = {
+      email: req.body.email,
+      password: req.body.password
+    };
+
+    // Call createuser with newUser object.
+    userQueries.getUser(newUser, (err, result) => {
+      let user = result["user"];
+      console.log("newUser", user);
+      // If there's an error, respond accordingly.
+      if (err) {
+        if (err.message) {
+          error = err.message;
+        } else {
+          error = err;
+        }
+        console.log("err", err);
         res.json({
           authenticated: false,
-          err: `Authentication Failed.`,
-          userId: user.id
+          err: `${error}`,
+          userId: undefined
         });
       } else {
-        res.json({
-          authenticated: true,
-          err: null,
-          userId: user.id
+        passport.authenticate("local")(req, res, () => {
+          if (!req.user) {
+            console.log("123");
+            res.json({
+              authenticated: false,
+              err: `User Created, Login Failed.`,
+              userId: user.id
+            });
+          } else {
+            console.log("918237", req.user);
+            res.json({
+              authenticated: true,
+              err: null,
+              userId: user.id
+            });
+          }
         });
       }
     });
