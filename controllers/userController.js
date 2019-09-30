@@ -3,7 +3,6 @@ const passport = require("passport");
 
 module.exports = {
   create(req, res, next) {
-    console.log("1", req.body);
     // Make newUser object from request body.
     newUser = {
       email: req.body.email,
@@ -12,23 +11,18 @@ module.exports = {
 
     // Call createuser with newUser object.
     userQueries.createUser(newUser, (err, user) => {
-      console.log("3");
       // If there's an error, respond accordingly.
       if (err) {
-        console.log("4 ERR? ");
         if (err.message) {
-          res.json({
-            authenticated: false,
-            err: `${err.message}`,
-            userId: undefined
-          });
+          error = err.message;
         } else {
-          res.json({
-            authenticated: false,
-            err: `${err}`,
-            userId: undefined
-          });
+          error = err;
         }
+        res.json({
+          authenticated: false,
+          err: `${error}`,
+          userId: undefined
+        });
       } else {
         passport.authenticate("local")(req, res, () => {
           if (!req.user) {
@@ -44,6 +38,23 @@ module.exports = {
               userId: user.id
             });
           }
+        });
+      }
+    });
+  },
+  login(req, res, next) {
+    passport.authenticate("local")(req, res, () => {
+      if (!req.user) {
+        res.json({
+          authenticated: false,
+          err: `Authentication Failed.`,
+          userId: user.id
+        });
+      } else {
+        res.json({
+          authenticated: true,
+          err: null,
+          userId: user.id
         });
       }
     });
